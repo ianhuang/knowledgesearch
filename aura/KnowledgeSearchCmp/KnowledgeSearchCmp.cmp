@@ -1,0 +1,125 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes"
+                extends="c:AuraComponentBase" 
+                controller="KnowledgeSearchApexController"
+                access="global" >
+    
+<aura:attribute name="articles" type="Object[]" access="PRIVATE" />
+<aura:attribute name="recentlyViewedArticles" type="Object[]" access="PRIVATE" />
+<aura:attribute name="dataCategoryGroups" type="List" default="[]" access="PRIVATE"/>
+<aura:attribute name="selectedCategory1" type="String" default="" access="PRIVATE"/>
+<aura:attribute name="selectedCategory2" type="String" default="" access="PRIVATE"/>
+<aura:attribute name="selectedCategory3" type="String" default="" access="PRIVATE"/>
+<aura:attribute name="selectedCategory4" type="String" default="" access="PRIVATE"/>    
+<aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+<lightning:card class="slds-card_boundary">
+    <div class="slds-p-horizontal_small">
+        <!-- Title -->
+        <h2 class="title slds-m-bottom_small">
+            <span class="slds-text-heading_small slds-truncate" title="Knowledge">Knowledge Articles</span>
+        </h2>
+        
+        <!-- Search -->
+        <div class="slds-grid slds-m-bottom_small">          
+            <div class="slds-size--1-of-2 slds-p-left_small">
+                <lightning:input aura:id="searchTerm" placeholder="Enter search text..." class="slds-m-right_small" />
+            </div>
+            <div class="slds-size--4-of-12 slds-clearfix">
+                <lightning:buttonMenu iconName="utility:sort" alternativeText="Sort options" class="slds-float_right" menuAlignment="right">
+                    <lightning:menuItem label="Relevance" value="relevance" />
+                    <lightning:menuItem label="Ascending" value="ascending" />
+                    <lightning:menuItem label="Descending" value="descending" />
+                </lightning:buttonMenu>
+            </div>
+        </div>
+        
+        <!-- categories -->
+        <div class="slds-grid slds-m-bottom_small">
+            <!--aura:iteration items="{!v.dataCategoryGroups}" var="group"-->
+                <div class="slds-size--1-of-8 slds-p-left_small">
+                    <lightning:select name="{!v.dataCategoryGroups[0].value}" label="{!v.dataCategoryGroups[0].label}" value="{!v.selectedCategory1}">
+                        <option text="No Filter" value=""/>
+                        <aura:iteration items="{!v.dataCategoryGroups[0].childSelections}" var="category">
+                           <option text="{!category.label}" value="{!v.dataCategoryGroups[0].value + '|' + category.value}"/>
+                        </aura:iteration>    
+                    </lightning:select>
+                </div>
+                <div class="slds-size--1-of-8 slds-p-left_small">
+                    <lightning:select name="{!v.dataCategoryGroups[1].value}" label="{!v.dataCategoryGroups[1].label}" value="{!v.selectedCategory2}">
+                        <option text="No Filter" value=""/>
+                        <aura:iteration items="{!v.dataCategoryGroups[1].childSelections}" var="category">
+                           <option text="{!category.label}" value="{!v.dataCategoryGroups[1].value + '|' + category.value}"/>
+                        </aura:iteration>    
+                    </lightning:select>
+                </div>
+                <div class="slds-size--1-of-8 slds-p-left_small">
+                    <lightning:select name="{!v.dataCategoryGroups[2].value}" label="{!v.dataCategoryGroups[2].label}" value="{!v.selectedCategory3}">
+                        <option text="No Filter" value=""/>
+                        <aura:iteration items="{!v.dataCategoryGroups[2].childSelections}" var="category">
+                           <option text="{!category.label}" value="{!v.dataCategoryGroups[2].value + '|' + category.value}"/>
+                        </aura:iteration>    
+                    </lightning:select>
+                </div>
+                <div class="slds-size--1-of-8 slds-p-left_small">
+                    <lightning:select name="{!v.dataCategoryGroups[3].value}" label="{!v.dataCategoryGroups[3].label}" value="{!v.selectedCategory4}">
+                        <option text="No Filter" value=""/>
+                        <aura:iteration items="{!v.dataCategoryGroups[3].childSelections}" var="category">
+                           <option text="{!category.label}" value="{!v.dataCategoryGroups[3].value + '|' + category.value}"/>
+                        </aura:iteration>    
+                    </lightning:select>
+                </div>
+            <!--/aura:iteration-->    
+        </div>
+        
+        <!-- Search button -->
+        <div class="slds-p-left_small">
+            <lightning:button aura:id="searchKB" variant="brand" label="Search" onclick="{!c.searchKB}" />
+        </div>
+        
+        <!--Search result-->
+        <div class="slds-p-left_small">
+        <aura:if isTrue="{!not(empty(v.articles))}">
+            <div class="slds-text-body_small slds-m-bottom_small">
+                <b>Suggested Articles</b>
+                <ul class="slds-list--horizontal slds-wrap slds-has-dividers_right">
+                    <li class="slds-item">{!v.articles.length} results</li>
+                    <li class="slds-item">Sorted by Relevance</li>
+                </ul>
+            </div>
+            <ul class="slds-has-dividers_bottom">
+                <aura:iteration items="{!v.articles}" var="a">
+                    <c:KnowledgeSearchResultCmp article="{!a}" />
+                </aura:iteration>
+            </ul>
+            <aura:set attribute="else">
+               <div class="slds-text-body_small slds-m-top_small slds-m-bottom_small">
+                   No articles found.
+               </div>    
+            </aura:set>
+        </aura:if>
+        </div>
+        
+        <div>&nbsp;</div>
+        <div>&nbsp;</div>
+        <div>&nbsp;</div>
+   </div>     
+</lightning:card>
+    
+<lightning:card class="slds-card_boundary">        
+    <!--Recently viewed articles-->
+    <div class="slds-p-horizontal_small">
+        <aura:if isTrue="{!not(empty(v.recentlyViewedArticles))}">
+            <!-- Title -->
+            <h2 class="title slds-m-bottom_small">
+                <span class="slds-text-heading_small slds-truncate" title="Knowledge">Recently Viewed Articles</span>
+            </h2>
+            <aura:iteration items="{!v.recentlyViewedArticles}" var="article">
+                <li class="slds-item slds-p-vertical--x-small">
+                    <lightning:formattedUrl value="{!'/lightning/r/FAQ__kav/' + article.Id + '/view'}" tooltip="{!article.Name}" label="{!article.Name}" target="_blank" />
+                </li>
+            </aura:iteration>    
+        </aura:if>
+    </div>    
+</lightning:card>
+
+</aura:component>

@@ -10,7 +10,7 @@ private class KnowledgeSearchApexControllerTest {
         KbManagement.PublishingService.publishArticle(article.KnowledgeArticleId, true);
         
         Test.startTest();
-        List<KnowledgeArticleVersion> articles = KnowledgeSearchApexController.search('UnitTest');
+        List<KnowledgeArticleVersion> articles = KnowledgeSearchApexController.search('UnitTest', '', '', '', '');
         System.assertEquals(0, articles.size());
         Test.stopTest();
     }
